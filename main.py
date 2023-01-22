@@ -92,4 +92,5 @@ review_df = pd.DataFrame({
     'Review_Url': review_url
 })
 
+
 review_df.to_csv('out.csv', index=False)
