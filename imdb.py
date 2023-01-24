@@ -2,11 +2,14 @@ import numpy as np
 import pandas as pd
 from scrapy.selector import Selector
 from selenium import webdriver
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 import time
 from tqdm import tqdm
 import warnings
+import re
 
 warnings.filterwarnings("ignore")
 
@@ -19,16 +22,27 @@ print(driver.title)
 time.sleep(1)
 body = driver.find_element(By.CSS_SELECTOR, 'body')
 
+#TODO implement review helpfulnes into project - this will find the object of the first review find a way to use it in all reviews
+#review_helpful = [int(s) for s in re.findall(r'\b\d+\b', driver.find_element(By.CSS_SELECTOR,
+#                                                                             "#main > section > div.lister > div.lister-list >" \
+#                                                                             " div:nth-child(1) > div.gradient-expander.show-more >" \
+#                                                                             " div.gradient-footer > div.actions.text-muted").text)]
+
 sel = Selector(text=driver.page_source)
 review_counts = sel.css('.lister .header span::text').extract_first().replace(',', '').split(' ')[0].replace(u"\xa0","")
 
-more_review_pages = int(int(review_counts) / 25)
+more_review_pages = round((int(review_counts) / 25) + 0.5)
 
 for i in tqdm(range(more_review_pages)):
+    page_count = 0
     try:
         css_selector = 'load-more-trigger'
-        time.sleep(2)
+        #time.sleep(2)
+        # driver.find_element(By.ID, css_selector).click()
+        driver_wait = WebDriverWait(driver, 10).until(
+            EC.visibility_of_element_located((By.ID, 'load-more-trigger')))
         driver.find_element(By.ID, css_selector).click()
+        page_count += 1
     except:
         pass
 
@@ -89,8 +103,9 @@ review_df = pd.DataFrame({
     'Rating': rating_list,
     'Review_Title': review_title_list,
     'Review': review_list,
-    'Review_Url': review_url
+    'Review_Url': review_url,
 })
 
 
 review_df.to_csv('out.csv', index=False)
+
