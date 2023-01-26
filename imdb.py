@@ -13,14 +13,30 @@ import re
 
 warnings.filterwarnings("ignore")
 
+import tkinter as tk
+from tkinter import simpledialog
+
+ROOT = tk.Tk()
+
+ROOT.withdraw()
+# the input dialog
+USER_INP = simpledialog.askstring(title="Film name input",
+                                  prompt="Give me adress of reviews you want to analyse")
+
+
 driver = webdriver.Chrome('chromedriver.exe')
-url = 'https://www.imdb.com/title/tt0241527/reviews?ref_=tt_sa_3'
+url = USER_INP
+#url = 'https://www.imdb.com/title/tt0241527/reviews?ref_=tt_sa_3'
 time.sleep(1)
 driver.get(url)
 time.sleep(1)
 print(driver.title)
 time.sleep(1)
 body = driver.find_element(By.CSS_SELECTOR, 'body')
+release_date = re.findall(r'\b\d+\b', driver.find_element(By.CSS_SELECTOR, "#main > section > div.subpage_title_block > div > div > h3").text)
+
+print ('release year is: ',release_date)
+
 
 #TODO implement review helpfulnes into project - this will find the object of the first review find a way to use it in all reviews
 #review_helpful = [int(s) for s in re.findall(r'\b\d+\b', driver.find_element(By.CSS_SELECTOR,
